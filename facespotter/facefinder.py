@@ -1,5 +1,6 @@
 import cv2
 import logging
+import os
 
 class FaceFinder:
 
@@ -7,7 +8,9 @@ class FaceFinder:
         self.logger = logging.getLogger('facespotter.FaceFinder')
 
     def load(self, classifierXml="haarcascade_frontalface_default.xml"):
-        self._classifier = cv2.CascadeClassifier("resources\/{}".format(classifierXml))
+        xmlfile = os.path.join(os.path.dirname(__file__), 'resources/' + classifierXml)
+        self.logger.info("Loading classifier XML from:%s", xmlfile)
+        self._classifier = cv2.CascadeClassifier(xmlfile)
 
     def find(self, image):
         cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -19,7 +22,7 @@ class FaceFinder:
             return None
 
         for (x, y, w, h) in foundFaces:
-            self.logger.info("Found face at ({},{}), width: {}, height: {}", x, y, w, h)
+            self.logger.info("Found face at (%d,%d), width: %d, height: %d", x, y, w, h)
             return (x, y, w, h)
 
 

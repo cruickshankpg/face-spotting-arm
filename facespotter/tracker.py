@@ -11,6 +11,8 @@ class Tracker:
     # angle of view is 62.2 x 48.8
     FOV_X = 62
     FOV_Y = 49
+    RES_X = 640
+    RES_Y = 480
 
     def __init__(self):
         self.logger = logging.getLogger('facespotter.Tracker')
@@ -24,26 +26,23 @@ class Tracker:
     def run(self, loops):
         with PiCamera() as camera:
             time.sleep(0.1)
-            raw = PiRGBArray(camera)
-            i = 0
-            for foo in camera.capture_continuous(raw, format="bgr"):
-                imageArray = raw.array
-                face = self._faceFinder.find(imageArray)
-                if (face is not None):
-                    self.__lookAtFace(raw, face)
-                raw.flush()
-                i += 1
-                if (i >= loops):
-                    break
-                time.sleep(0.5)
+            camera.resolution = (Tracker.RES_X, Tracker.RES_Y)
+            with PiRGBArray(camera) as raw:
+                i = 0
+                for foo in camera.capture_continuous(raw, format="bgr"):
+                    imageArray = raw.array
+                    face = self._faceFinder.find(imageArray)
+                    if (face is not None):
+                        self.__lookAtFace(raw, face)
+                    raw.truncate(0)
+                    i += 1
+                    if (i >= loops):
+                        break
+                    time.sleep(0.5)
 
     def __lookAtFace(self, imageArray, face):
-        fullSize = imageArray.shape()
-        imageHeight = fullSize[0]
-        imageWidth = fullSize[1]
-
-        targetX = ((face[0] + face[2]/2) / imageWidth - 0.5) * Tracker.FOV_X + Arm.BASE_CENTRE
-        targetY = ((face[1] + face[3]/2) / imageHeight - 0.5) * Tracker.FOV_Y + Arm.LIFT_CENTRE
+        targetX = ((face[0] + face[2]/2) / Tracker.RES_X - 0.5) * Tracker.FOV_X + Arm.BASE_CENTRE
+        targetY = ((face[1] + face[3]/2) / Tracker.RES_Y - 0.5) * Tracker.FOV_Y + Arm.LIFT_CENTRE
 
         self._arm.rotate(targetX)
         self._arm.lift(targetY)
@@ -55,6 +54,20 @@ if __name__ == "__main__":
     parser.add_argument("loops", help="Number of loops to run for",
                     type=int)
     args = parser.parse_args()
+    logger = logging.getLogger('facespotter')
+    logger.setLevel(logging.DEBUG)
+
+    fh = logging.FileHandler('facespotter.log')
+    fh.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+    # add the handlers to the logger
+    logger.addHandler(fh)
+    logger.addHandler(ch)
 
     tracker = Tracker()
     tracker.setup()

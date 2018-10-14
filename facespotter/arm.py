@@ -13,9 +13,9 @@ class Arm:
         self.logger = logging.getLogger('facespotter.Arm')
 
     def connect(self):
-        self.logger.info('Connecting to arm using serial: {} and BAUD: {}'.format(self.port, self.baud))
+        self.logger.info('Connecting to arm using serial: %s and BAUD: %d', self.port, self.baud)
         self._serial = serial.Serial(self.port, self.baud)
-        self.logger.debug('Connected to', self._serial)
+        self.logger.debug('Connected to %s', self._serial)
         self.__resetPositions()
 
     def disconnect(self):
@@ -23,24 +23,24 @@ class Arm:
         self._serial.close()
 
     def __send(self, command):
-        self.logger.debug('Sending command {}', command)
-        self._serial.write(bytes(command))
+        self.logger.debug('Sending command %s', command)
+        self._serial.write(bytes(command, 'utf8'))
 
     def rotate(self, angle):
-        self.logger.info('Rotating to {} degrees', angle)
-        command = "b" + angle
+        self.logger.info('Rotating to %d degrees', angle)
+        command = "b{}".format(angle)
         self.__send(command)
         self._baseAngle = angle
 
     def reach(self, angle):
-        self.logger.info('Reaching to {} degrees', angle)
-        command = "r" + angle
+        self.logger.info('Reaching to %d degrees', angle)
+        command = "r{}".format(angle)
         self.__send(command)
         self._reachAngle = angle
 
     def lift(self, angle):
-        self.logger.info('Lifting to {} degrees', angle)
-        command = "l" + angle
+        self.logger.info('Lifting to %d degrees', angle)
+        command = "l{}".format(angle)
         self.__send(command)
         self._liftAngle = angle
 
