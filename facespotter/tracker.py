@@ -33,19 +33,22 @@ class Tracker:
                     imageArray = raw.array
                     face = self._faceFinder.find(imageArray)
                     if (face is not None):
-                        self.__lookAtFace(raw, face)
+                        self.__lookAtFace(face)
                     raw.truncate(0)
                     i += 1
                     if (i >= loops):
                         break
                     time.sleep(0.2)
 
-    def __lookAtFace(self, imageArray, face):
+    def __lookAtFace(self, face):
         targetX = Arm.BASE_MAX - ((face[0] + face[2]/2) / Tracker.RES_X) * Arm.BASE_RANGE
         targetY = Arm.LIFT_MAX - ((face[1] + face[3]/2) / Tracker.RES_Y) * Arm.LIFT_RANGE
 
+        targetReach = Arm.REACH_MAX - face[2] * Arm.REACH_RANGE / Tracker.RES_X
+
         self._arm.rotate(targetX)
         self._arm.lift(targetY)
+        self._arm.reach(targetReach)
 
 
 if __name__ == "__main__":
