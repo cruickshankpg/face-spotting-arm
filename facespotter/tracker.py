@@ -38,11 +38,11 @@ class Tracker:
                     i += 1
                     if (i >= loops):
                         break
-                    time.sleep(0.5)
+                    time.sleep(0.2)
 
     def __lookAtFace(self, imageArray, face):
-        targetX = ((face[0] + face[2]/2) / Tracker.RES_X - 0.5) * Tracker.FOV_X + Arm.BASE_CENTRE
-        targetY = ((face[1] + face[3]/2) / Tracker.RES_Y - 0.5) * Tracker.FOV_Y + Arm.LIFT_CENTRE
+        targetX = Arm.BASE_MAX - ((face[0] + face[2]/2) / Tracker.RES_X) * Arm.BASE_RANGE
+        targetY = Arm.LIFT_MAX - ((face[1] + face[3]/2) / Tracker.RES_Y) * Arm.LIFT_RANGE
 
         self._arm.rotate(targetX)
         self._arm.lift(targetY)
